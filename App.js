@@ -6,106 +6,71 @@
  * @flow strict-local
  */
 
-import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+ import React, { useState, useEffect } from 'react';
+ import { View, Text, Modal,} from 'react-native'
+ import { createAppContainer } from "react-navigation";
+ import AppNavigator from './navigation/navigation';
+ import NavigationService from './navigation/navigationService'
+ import { useDispatch, useSelector } from 'react-redux'
+ import { errorMsg,successMsg } from './actions/index';
+ import { SafeAreaView } from 'react-navigation';
+ const AppContainer = createAppContainer(AppNavigator)
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-const Section = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
-
-const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-export default App;
+ const App = () => {
+   const [showError, setShowError] = useState(false)
+   const [showSuccess, setShowSuccess] = useState(false)
+   const success = useSelector(state => state.successMsg)
+   const error = useSelector(state => state.errorMsg)
+   const dispatch = useDispatch()
+   useEffect(() => {
+     if (error && error.length > 0) {
+       setShowError(true)
+       setTimeout(() => {
+         setShowError(false)
+         dispatch(errorMsg(''))
+       }, 3000)
+     }
+   }, [error])
+ 
+   useEffect(() => {
+     if (success && success.length > 0) {
+       setShowSuccess(true)
+       setTimeout(() => {
+         setShowSuccess(false)
+         dispatch(successMsg(''))
+       }, 3000)
+     }
+   }, [success])
+ 
+   return (
+     <SafeAreaView style={{ flex: 1 }}>
+       <View style={{ flex: 1 }}>
+         <AppContainer
+           ref={navigatorRef => {
+             NavigationService.setTopLevelNavigator(navigatorRef);
+           }}
+         />
+         <Modal visible={showError}
+           transparent={true}>
+           <SafeAreaView style={{ top: 25 }}>
+             <View style={{ position: 'absolute', backgroundColor: '#b30000', width: '100%', padding: 10, justifyContent: 'center', alignItems: 'center' }}>
+               <Text style={{ color: 'white', fontSize: 16, paddingVertical: 3 }}>{error}</Text>
+             </View>
+           </SafeAreaView>
+         </Modal>
+         <Modal visible={showSuccess}
+           transparent={true}>
+           <SafeAreaView style={{ top: 25 }}>
+             <View style={{ position: 'absolute', backgroundColor: 'green', width: '100%', padding: 10, justifyContent: 'center', alignItems: 'center' }}>
+               <Text style={{ color: 'white', fontSize: 16, paddingVertical: 3 }}>{success}</Text>
+             </View>
+           </SafeAreaView>
+         </Modal>
+       </View>
+     </SafeAreaView>
+   );
+ };
+ 
+ 
+ export default App;
